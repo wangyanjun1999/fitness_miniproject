@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useCalendar } from '../hooks/useCalendar';
@@ -8,6 +8,7 @@ import AddWorkoutModal from '../components/AddWorkoutModal';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { workoutApi } from '../lib/api/workouts';
 import { logApi } from '../lib/api/logs';
+import type { Plan } from '../types/database';
 
 export default function Calendar() {
   const { profile } = useAuthStore();
@@ -200,6 +201,23 @@ export default function Calendar() {
           userId={profile?.id || ''}
           initialDate={selectedDate}
           bmi={bmi}
+          onWorkoutAdded={async () => {
+            try {
+              const monthWorkouts = await workoutApi.getMonthWorkouts(profile?.id || '', currentDate);
+              // Group workouts by date
+              const groupedWorkouts = monthWorkouts.reduce<Record<string, Plan[]>>((acc, workout) => {
+                const date = workout.date;
+                if (!acc[date]) {
+                  acc[date] = [];
+                }
+                acc[date].push(workout);
+                return acc;
+              }, {});
+              setWorkouts(groupedWorkouts);
+            } catch (error) {
+              console.error('Error updating workouts:', error);
+            }
+          }}
         />
       )}
     </div>
