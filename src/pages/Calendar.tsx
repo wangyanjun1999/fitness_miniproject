@@ -6,10 +6,12 @@ import { formatDate, getDaysInMonth, isToday } from '../utils/date';
 import { calculateBMI } from '../utils/health';
 import AddWorkoutModal from '../components/AddWorkoutModal';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { workoutApi } from '../lib/api/workouts';
+import { logApi } from '../lib/api/logs';
 
 export default function Calendar() {
   const { profile } = useAuthStore();
-  const { currentDate, workouts, loading, previousMonth, nextMonth } = useCalendar(profile?.id);
+  const { currentDate, workouts, loading, previousMonth, nextMonth, setWorkouts } = useCalendar(profile?.id);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
@@ -30,17 +32,39 @@ export default function Calendar() {
   const handleDeleteWorkout = async (workoutId: number) => {
     if (window.confirm('Are you sure you want to delete this workout?')) {
       try {
-        // Optimistically update UI
+        // 查找要删除的训练计划所在的日期和详细信息
         const dateStr = Object.keys(workouts).find(date => 
           workouts[date].some(w => w.id === workoutId)
         );
+        const workout = dateStr ? workouts[dateStr].find(w => w.id === workoutId) : null;
+        
+        // 调用API删除数据
+        await workoutApi.deleteWorkout(workoutId);
+        
+        // 更新本地状态（深拷贝以避免直接修改状态）
         if (dateStr) {
-          workouts[dateStr] = workouts[dateStr].filter(w => w.id !== workoutId);
+          const updatedWorkouts = {...workouts};
+          updatedWorkouts[dateStr] = updatedWorkouts[dateStr].filter(w => w.id !== workoutId);
+          setWorkouts(updatedWorkouts);
         }
-        // Reload the page to show the updated workouts
-        window.location.reload();
+        
+        // 记录删除操作的日志 - 使用单独的try-catch块处理日志错误
+        try {
+          if (profile?.id && workout) {
+            await logApi.createLog(profile.id, 'DELETE_WORKOUT', {
+              workout_id: workoutId,
+              exercise_name: workout.exercises?.name,
+              date: workout.date
+            });
+          }
+        } catch (logError) {
+          // 仅记录日志错误，不影响主要功能
+          console.error('Error logging workout deletion:', logError);
+        }
       } catch (error) {
         console.error('Error deleting workout:', error);
+        // TODO: alert('Failed to delete workout. Please try again.');
+         window.location.reload()
       }
     }
   };
