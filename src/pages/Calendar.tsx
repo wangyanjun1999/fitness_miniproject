@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useCalendar } from '../hooks/useCalendar';
@@ -7,7 +7,7 @@ import { calculateBMI } from '../utils/health';
 import AddWorkoutModal from '../components/AddWorkoutModal';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { workoutApi } from '../lib/api/workouts';
-import type { Plan } from '../types/database';
+import { logApi } from '../lib/api/logs';
 
 export default function Calendar() {
   const { profile } = useAuthStore();
@@ -30,53 +30,43 @@ export default function Calendar() {
   };
 
   const handleDeleteWorkout = async (workoutId: number) => {
-    console.log('Attempting to delete workout with ID:', workoutId);
     if (window.confirm('Are you sure you want to delete this workout?')) {
       try {
-        // Call API to delete workout
-        const response = await workoutApi.deleteWorkout(workoutId);
-        console.log('API response:', response);
-
-        // Optimistically update UI
+        // 查找要删除的训练计划所在的日期和详细信息
         const dateStr = Object.keys(workouts).find(date => 
           workouts[date].some(w => w.id === workoutId)
         );
+        const workout = dateStr ? workouts[dateStr].find(w => w.id === workoutId) : null;
+        
+        // 调用API删除数据
+        await workoutApi.deleteWorkout(workoutId);
+        
+        // 更新本地状态（深拷贝以避免直接修改状态）
         if (dateStr) {
-          workouts[dateStr] = workouts[dateStr].filter(w => w.id !== workoutId);
-          console.log('Workout deleted from UI state:', workouts);
-          // Trigger a re-render by updating the state
-          setWorkouts({ ...workouts });
-        } else {
-          console.warn('Workout ID not found in any date:', workoutId);
+          const updatedWorkouts = {...workouts};
+          updatedWorkouts[dateStr] = updatedWorkouts[dateStr].filter(w => w.id !== workoutId);
+          setWorkouts(updatedWorkouts);
+        }
+        
+        // 记录删除操作的日志 - 使用单独的try-catch块处理日志错误
+        try {
+          if (profile?.id && workout) {
+            await logApi.createLog(profile.id, 'DELETE_WORKOUT', {
+              workout_id: workoutId,
+              exercise_name: workout.exercises?.name,
+              date: workout.date
+            });
+          }
+        } catch (logError) {
+          // 仅记录日志错误，不影响主要功能
+          console.error('Error logging workout deletion:', logError);
         }
       } catch (error) {
         console.error('Error deleting workout:', error);
+        // TODO: alert('Failed to delete workout. Please try again.');
+         window.location.reload()
       }
     }
-  };
-
-  const refreshWorkouts = async () => {
-    if (profile?.id) {
-      try {
-        const data = await workoutApi.getMonthWorkouts(profile.id, currentDate);
-        const grouped = data.reduce<Record<string, Plan[]>>((acc, workout) => {
-          const date = workout.date;
-          if (!acc[date]) {
-            acc[date] = [];
-          }
-          acc[date].push(workout);
-          return acc;
-        }, {});
-        setWorkouts(grouped);
-      } catch (error) {
-        console.error('Error refreshing workouts:', error);
-      }
-    }
-  };
-
-  const handleModalClose = () => {
-    setIsAddModalOpen(false);
-    setSelectedDate(null);
   };
 
   const isPast = (dateStr: string) => {
@@ -203,11 +193,13 @@ export default function Calendar() {
       {selectedDate && (
         <AddWorkoutModal
           isOpen={isAddModalOpen}
-          onClose={handleModalClose}
+          onClose={() => {
+            setIsAddModalOpen(false);
+            setSelectedDate(null);
+          }}
           userId={profile?.id || ''}
           initialDate={selectedDate}
           bmi={bmi}
-          onWorkoutAdded={refreshWorkouts}
         />
       )}
     </div>
