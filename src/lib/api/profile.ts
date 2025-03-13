@@ -9,6 +9,8 @@ interface ProfileUpdate {
   height: number | null;  // 身高
   weight: number | null;  // 体重
   goal: string | null;    // 健身目标
+  gender: 'male' | 'female' | 'other' | null;
+  age: number | null;
 }
 
 // 用户档案相关的API操作

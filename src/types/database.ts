@@ -7,6 +7,8 @@ export interface Profile {
   height: number | null;         // 身高（厘米）
   weight: number | null;         // 体重（千克）
   goal: 'increase' | 'decrease' | 'maintain' | null;  // 健身目标：增重、减重或保持
+  gender: 'male' | 'female' | 'other' | null;
+  age: number | null;
   created_at: string;           // 创建时间
   updated_at: string;           // 更新时间
 }
