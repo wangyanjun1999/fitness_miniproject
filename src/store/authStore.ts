@@ -53,7 +53,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       supabase.auth.onAuthStateChange(async (event, session) => {
         const currentUser = session?.user ?? null;
-        set({ user: currentUser });
+        set({ user: currentUser, loading: true });
 
         if (currentUser) {
           try {
@@ -77,9 +77,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           } catch (err) {
             console.error('Error loading profile on auth change:', err);
             set({ profile: null });
+          } finally {
+            set({ loading: false });
           }
         } else {
-          set({ profile: null });
+          set({ profile: null, loading: false });
         }
       });
     } catch (error) {
