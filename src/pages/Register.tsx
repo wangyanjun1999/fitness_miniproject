@@ -10,7 +10,11 @@ export default function Register() {
     email: '',
     password: '',
     confirmPassword: '',
-    username: ''
+    username: '',
+    gender: 'male',
+    age: '',
+    height: '',
+    weight: ''
   });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,8 +35,20 @@ export default function Register() {
   };
 
   const validateForm = () => {
-    if (!formData.email || !formData.password || !formData.username) {
+    if (!formData.email || !formData.password || !formData.username || !formData.age || !formData.height || !formData.weight) {
       setError('All fields are required');
+      return false;
+    }
+    if (parseInt(formData.age) < 13 || parseInt(formData.age) > 120) {
+      setError('Age must be between 13 and 120');
+      return false;
+    }
+    if (parseInt(formData.height) < 100 || parseInt(formData.height) > 250) {
+      setError('Height must be between 100 and 250 cm');
+      return false;
+    }
+    if (parseInt(formData.weight) < 30 || parseInt(formData.weight) > 300) {
+      setError('Weight must be between 30 and 300 kg');
       return false;
     }
     if (formData.password.length < 6) {
@@ -52,7 +68,7 @@ export default function Register() {
     
     setIsSubmitting(true);
     try {
-      await signUp(formData.email, formData.password, formData.username);
+      await signUp(formData.email, formData.password, formData.username, formData.gender, parseInt(formData.age), parseInt(formData.height), parseInt(formData.weight));
       navigate('/');
     } catch (err) {
       setError('Registration failed. Please try again.');
@@ -147,6 +163,82 @@ export default function Register() {
                   autoComplete="new-password"
                   required
                   value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
+                Gender
+              </label>
+              <div className="mt-1">
+                <select
+                  id="gender"
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="age" className="block text-sm font-medium text-gray-700">
+                Age
+              </label>
+              <div className="mt-1">
+                <input
+                  id="age"
+                  name="age"
+                  type="number"
+                  required
+                  min="13"
+                  max="120"
+                  value={formData.age}
+                  onChange={handleChange}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="height" className="block text-sm font-medium text-gray-700">
+                Height (cm)
+              </label>
+              <div className="mt-1">
+                <input
+                  id="height"
+                  name="height"
+                  type="number"
+                  required
+                  min="100"
+                  max="250"
+                  value={formData.height}
+                  onChange={handleChange}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="weight" className="block text-sm font-medium text-gray-700">
+                Weight (kg)
+              </label>
+              <div className="mt-1">
+                <input
+                  id="weight"
+                  name="weight"
+                  type="number"
+                  required
+                  min="30"
+                  max="300"
+                  value={formData.weight}
                   onChange={handleChange}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 />
