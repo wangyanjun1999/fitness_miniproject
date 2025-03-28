@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trash2, ChevronDown, ChevronUp, ExternalLink, BookOpen } from 'lucide-react';
+import { Trash2, ExternalLink} from 'lucide-react';
 import type { Plan } from '../types/database';
 import ExerciseGuideModal from './ExerciseGuideModal';
 
@@ -12,7 +12,6 @@ interface WorkoutCardProps {
 export default function WorkoutCard({ workout, onToggleComplete, onDelete }: WorkoutCardProps) {
   // 状态管理
   const [isDeleting, setIsDeleting] = useState(false);    // 是否正在删除
-  const [isExpanded, setIsExpanded] = useState(false);    // 是否展开详情
   const [isGuideOpen, setIsGuideOpen] = useState(false);  // 是否打开指导模态框
 
   // 处理删除操作
@@ -107,7 +106,7 @@ export default function WorkoutCard({ workout, onToggleComplete, onDelete }: Wor
       </div>
 
       {/* 展开的详细信息区域 */}
-      {isExpanded && hasAdditionalInfo && (
+      {hasAdditionalInfo && (
         <div className="border-t border-gray-200 p-4 space-y-4">
           {/* 运动描述 */}
           {workout.exercises?.description && (

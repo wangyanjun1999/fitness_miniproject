@@ -249,7 +249,7 @@ export default function AddWorkoutModal({ isOpen, onClose, userId, initialDate, 
                         className="mt-2 inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100"
                       >
                         <BookOpen className="h-3.5 w-3.5 mr-1" />
-                        查看运动指南
+                        Check Guide
                       </button>
                     )}
                   </div>

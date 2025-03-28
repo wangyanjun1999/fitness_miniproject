@@ -91,7 +91,7 @@ export default function ExerciseGuideModal({ isOpen, onClose, exercise }: Exerci
                 {/* 标题和关闭按钮 */}
                 <div className="flex justify-between items-center mb-4">
                   <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
-                    {exercise.name} - 详细指导
+                    {exercise.name} - Guide Details
                   </Dialog.Title>
                   <button
                     type="button"
@@ -114,7 +114,7 @@ export default function ExerciseGuideModal({ isOpen, onClose, exercise }: Exerci
                     </span>
                     {exercise.calories_per_unit && (
                       <span className="ml-2 text-xs text-gray-500">
-                        每单位消耗约 {exercise.calories_per_unit} 卡路里
+                        burn {exercise.calories_per_unit} calories per unit
                       </span>
                     )}
                   </div>
@@ -122,7 +122,7 @@ export default function ExerciseGuideModal({ isOpen, onClose, exercise }: Exerci
                   {/* 运动描述 */}
                   {exercise.description && (
                     <div>
-                      <h4 className="text-md font-medium text-gray-700 mb-2">详细说明</h4>
+                      <h4 className="text-md font-medium text-gray-700 mb-2">Details</h4>
                       <p className="text-gray-600">{exercise.description}</p>
                     </div>
                   )}
@@ -130,12 +130,12 @@ export default function ExerciseGuideModal({ isOpen, onClose, exercise }: Exerci
                   {/* 示范图片滑动区域 */}
                   {photos.length > 0 && (
                     <div>
-                      <h4 className="text-md font-medium text-gray-700 mb-2">示范图片</h4>
+                      <h4 className="text-md font-medium text-gray-700 mb-2">Photo Examples</h4>
                       <div className="relative">
                         <div className="aspect-ratio-container aspect-16-9 bg-gray-100 rounded-lg overflow-hidden">
                           <img
                             src={photos[currentPhotoIndex]}
-                            alt={`${exercise.name} 示范 ${currentPhotoIndex + 1}`}
+                            alt={`${exercise.name} Photo Example ${currentPhotoIndex + 1}`}
                             className="aspect-ratio-content object-contain"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
@@ -175,11 +175,11 @@ export default function ExerciseGuideModal({ isOpen, onClose, exercise }: Exerci
                   {/* 教学视频 */}
                   {embedUrl && (
                     <div>
-                      <h4 className="text-md font-medium text-gray-700 mb-2">视频教程</h4>
+                      <h4 className="text-md font-medium text-gray-700 mb-2">Video Tutorial</h4>
                       <div className="aspect-ratio-container aspect-16-9 rounded-lg overflow-hidden bg-gray-100">
                         <iframe
                           src={embedUrl}
-                          title={`${exercise.name} 视频教程`}
+                          title={`${exercise.name} Video Tutorial`}
                           frameBorder="0"
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowFullScreen
@@ -192,7 +192,7 @@ export default function ExerciseGuideModal({ isOpen, onClose, exercise }: Exerci
                   {/* 外部视频链接 */}
                   {exercise.video && !embedUrl && (
                     <div>
-                      <h4 className="text-md font-medium text-gray-700 mb-2">视频教程</h4>
+                      <h4 className="text-md font-medium text-gray-700 mb-2">Video Tutorial</h4>
                       <a
                         href={exercise.video}
                         target="_blank"
@@ -200,7 +200,7 @@ export default function ExerciseGuideModal({ isOpen, onClose, exercise }: Exerci
                         className="inline-flex items-center text-blue-600 hover:text-blue-800"
                       >
                         <ExternalLink className="h-4 w-4 mr-1" />
-                        在新窗口中观看教程视频
+                        Watch Tutorial
                       </a>
                     </div>
                   )}
