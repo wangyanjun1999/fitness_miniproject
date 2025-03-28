@@ -110,7 +110,7 @@ export default function ExerciseGuideModal({ isOpen, onClose, exercise }: Exerci
                         ? 'bg-blue-100 text-blue-800' 
                         : 'bg-green-100 text-green-800'
                     }`}>
-                      {exercise.type === 'strength' ? '力量训练' : '有氧运动'}
+                      {exercise.type === 'strength' ? 'Strength Training' : 'Cardio'}
                     </span>
                     {exercise.calories_per_unit && (
                       <span className="ml-2 text-xs text-gray-500">
