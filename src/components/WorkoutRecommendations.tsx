@@ -1,7 +1,8 @@
 // 引入必要的依赖
-import React from 'react';
-import { Dumbbell, Heart, Scale } from 'lucide-react';
+import React, { useState } from 'react';
+import { Dumbbell, Heart, Scale, BookOpen } from 'lucide-react';
 import type { Exercise } from '../types/database';
+import ExerciseGuideModal from './ExerciseGuideModal';
 
 // 组件属性接口
 interface WorkoutRecommendationsProps {
@@ -119,6 +120,10 @@ const getWorkoutPlan = (bmi: number): WorkoutPlan => {
 
 // 训练推荐组件
 export default function WorkoutRecommendations({ bmi, onSelectWorkout, exercises }: WorkoutRecommendationsProps) {
+  // 状态管理
+  const [guideExercise, setGuideExercise] = useState<Exercise | null>(null);  // 当前查看指南的运动项目
+  const [isGuideOpen, setIsGuideOpen] = useState(false);  // 是否打开运动指南模态框
+
   // 如果没有BMI数据，不显示推荐
   if (!bmi) return null;
 
@@ -131,8 +136,21 @@ export default function WorkoutRecommendations({ bmi, onSelectWorkout, exercises
     return exercises.find(e => e.name.toLowerCase() === name.toLowerCase());
   };
 
+  // 打开运动指南
+  const openGuide = (exercise: Exercise) => {
+    setGuideExercise(exercise);
+    setIsGuideOpen(true);
+  };
+
   return (
     <div className="bg-white shadow sm:rounded-lg overflow-hidden">
+      {/* 运动指南模态框 */}
+      <ExerciseGuideModal
+        isOpen={isGuideOpen}
+        onClose={() => setIsGuideOpen(false)}
+        exercise={guideExercise}
+      />
+
       {/* 计划标题和描述 */}
       <div className={`px-4 py-5 sm:p-6 border-l-4 border-${plan.color}-500`}>
         <div className="flex items-center">
@@ -161,28 +179,53 @@ export default function WorkoutRecommendations({ bmi, onSelectWorkout, exercises
                   const exercise = findExercise(name);
                   if (!exercise) return null;
 
+                  // 检查是否有指导内容
+                  const hasGuideContent = exercise.description || 
+                                          (exercise.demonstration_photos && exercise.demonstration_photos.length > 0) || 
+                                          exercise.video;
+
                   return (
-                    <button
+                    <div
                       key={name}
-                      onClick={() => onSelectWorkout(exercise, rec.sets, rec.reps)}
-                      className={`relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-${plan.color}-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${plan.color}-500`}
+                      className={`relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm flex flex-col space-y-4 hover:border-${plan.color}-400`}
                     >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">
-                          {exercise.name}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {rec.sets} sets × {rec.reps} {rec.type === 'strength' ? 'reps' : 'mins'}
-                        </p>
+                      <div className="flex items-center space-x-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900">
+                            {exercise.name}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {rec.sets} sets × {rec.reps} {rec.type === 'strength' ? 'reps' : 'mins'}
+                          </p>
+                        </div>
+                        <div className={`flex-shrink-0 h-10 w-10 rounded-full bg-${plan.color}-100 flex items-center justify-center`}>
+                          {rec.type === 'strength' ? (
+                            <Dumbbell className={`h-5 w-5 text-${plan.color}-600`} />
+                          ) : (
+                            <Heart className={`h-5 w-5 text-${plan.color}-600`} />
+                          )}
+                        </div>
                       </div>
-                      <div className={`flex-shrink-0 h-10 w-10 rounded-full bg-${plan.color}-100 flex items-center justify-center`}>
-                        {rec.type === 'strength' ? (
-                          <Dumbbell className={`h-5 w-5 text-${plan.color}-600`} />
-                        ) : (
-                          <Heart className={`h-5 w-5 text-${plan.color}-600`} />
+                      
+                      <div className="flex justify-between items-center mt-2">
+                        {hasGuideContent && (
+                          <button
+                            onClick={() => openGuide(exercise)}
+                            className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md bg-${plan.color}-50 text-${plan.color}-700 hover:bg-${plan.color}-100`}
+                          >
+                            <BookOpen className="h-3.5 w-3.5 mr-1" />
+                            Guidance
+                          </button>
                         )}
+                        
+                        <button
+                          onClick={() => onSelectWorkout(exercise, rec.sets, rec.reps)}
+                          className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md bg-${plan.color}-100 text-${plan.color}-700 hover:bg-${plan.color}-200`}
+                        >
+                          Add to plan
+                        </button>
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </div>

@@ -6,6 +6,7 @@ import { formatDate, getDaysInMonth, isToday } from '../utils/date';
 import { calculateBMI } from '../utils/health';
 import AddWorkoutModal from '../components/AddWorkoutModal';
 import LoadingSpinner from '../components/LoadingSpinner';
+import CalendarWorkoutItem from '../components/CalendarWorkoutItem';
 import { workoutApi } from '../lib/api/workouts';
 import { logApi } from '../lib/api/logs';
 import type { Plan } from '../types/database';
@@ -157,31 +158,15 @@ export default function Calendar() {
                   </div>
                   <div className="mt-1 space-y-1 overflow-y-auto max-h-24">
                     {dayWorkouts.map((workout) => (
-                      <div
+                      <CalendarWorkoutItem
                         key={workout.id}
-                        className={`text-xs p-1 rounded flex items-center justify-between group/workout ${
-                          workout.completed
-                            ? 'bg-green-100 text-green-800'
-                            : isPastDay
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-blue-100 text-blue-800'
-                        }`}
-                        title={`${workout.exercises?.name} - ${workout.sets} sets × ${
-                          workout.exercises?.type === 'strength' ? `${workout.reps} reps` : `${workout.reps} mins`
-                        }`}
-                      >
-                        <span className="truncate flex-1">{workout.exercises?.name}</span>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteWorkout(workout.id);
-                          }}
-                          className="opacity-0 group-hover/workout:opacity-100 ml-1 p-0.5 hover:bg-red-200 rounded transition-opacity"
-                          title="Delete workout"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
-                      </div>
+                        workout={workout}
+                        isPastDay={isPastDay}
+                        onDelete={(e) => {
+                          e.stopPropagation();
+                          handleDeleteWorkout(workout.id);
+                        }}
+                      />
                     ))}
                   </div>
                 </div>

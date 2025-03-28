@@ -1,3 +1,33 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* 自定义样式 */
+@layer utilities {
+  /* 宽高比样式 */
+  .aspect-ratio-container {
+    position: relative;
+    height: 0;
+    overflow: hidden;
+  }
+  
+  .aspect-ratio-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .aspect-16-9 {
+    padding-top: 56.25%; /* 16:9 宽高比 */
+  }
+  
+  .aspect-4-3 {
+    padding-top: 75%; /* 4:3 宽高比 */
+  }
+  
+  .aspect-1-1 {
+    padding-top: 100%; /* 1:1 宽高比（正方形） */
+  }
+}

@@ -1,11 +1,12 @@
 // 引入必要的依赖
 import React, { useState, useEffect } from 'react';
-import { X, Dumbbell, Timer } from 'lucide-react';
+import { X, Dumbbell, Timer, BookOpen } from 'lucide-react';
 import { exerciseApi } from '../lib/api/exercises';
 import { workoutApi } from '../lib/api/workouts';
 import type { Exercise } from '../types/database';
 import LoadingSpinner from './LoadingSpinner';
 import WorkoutRecommendations from './WorkoutRecommendations';
+import ExerciseGuideModal from './ExerciseGuideModal';
 
 // 组件属性接口
 interface AddWorkoutModalProps {
@@ -25,6 +26,7 @@ export default function AddWorkoutModal({ isOpen, onClose, userId, initialDate, 
   const [submitting, setSubmitting] = useState(false);         // 提交状态
   const [error, setError] = useState('');                      // 错误信息
   const [selectedType, setSelectedType] = useState<'strength' | 'cardio'>('strength');  // 选中的运动类型
+  const [isGuideOpen, setIsGuideOpen] = useState(false);       // 是否显示指南模态框
   const [formData, setFormData] = useState({
     exerciseId: '',   // 选中的运动项目ID
     sets: '3',        // 训练组数
@@ -59,6 +61,18 @@ export default function AddWorkoutModal({ isOpen, onClose, userId, initialDate, 
       fetchExercises();
     }
   }, [isOpen, selectedType]);
+
+  // 获取当前选中的运动项目
+  const selectedExercise = formData.exerciseId 
+    ? exercises.find(e => e.id.toString() === formData.exerciseId) || null 
+    : null;
+
+  // 检查选中的运动项目是否有指南内容
+  const hasGuideContent = selectedExercise && (
+    selectedExercise.description || 
+    (selectedExercise.demonstration_photos && selectedExercise.demonstration_photos.length > 0) ||
+    selectedExercise.video
+  );
 
   // 处理表单提交
   const handleSubmit = async (e: React.FormEvent) => {
@@ -112,6 +126,13 @@ export default function AddWorkoutModal({ isOpen, onClose, userId, initialDate, 
 
   return (
     <div className="fixed inset-0 z-10 overflow-y-auto">
+      {/* 运动指南模态框 */}
+      <ExerciseGuideModal
+        isOpen={isGuideOpen}
+        onClose={() => setIsGuideOpen(false)}
+        exercise={selectedExercise}
+      />
+
       {/* 模态框背景遮罩 */}
       <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div className="fixed inset-0 transition-opacity" aria-hidden="true">
@@ -219,6 +240,18 @@ export default function AddWorkoutModal({ isOpen, onClose, userId, initialDate, 
                         </option>
                       ))}
                     </select>
+                    
+                    {/* 显示指南按钮 */}
+                    {hasGuideContent && (
+                      <button
+                        type="button"
+                        onClick={() => setIsGuideOpen(true)}
+                        className="mt-2 inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100"
+                      >
+                        <BookOpen className="h-3.5 w-3.5 mr-1" />
+                        查看运动指南
+                      </button>
+                    )}
                   </div>
 
                   {/* 组数和重复次数/时长设置 */}
